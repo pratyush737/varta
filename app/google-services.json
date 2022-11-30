@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "974878842441",
+    "project_id": "varta-f3c46",
+    "storage_bucket": "varta-f3c46.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:974878842441:android:ba45a36012697d356ba998",
+        "android_client_info": {
+          "package_name": "com.example.varta"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "974878842441-7mi3huv4h45t7hblsd6kiv34g1gu58jg.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAMaIeWTICtgD7q1ysD40y0ve7hVuLq84E"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "974878842441-7mi3huv4h45t7hblsd6kiv34g1gu58jg.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
