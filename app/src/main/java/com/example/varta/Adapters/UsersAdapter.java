@@ -15,6 +15,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.example.varta.ChatDetailActivity;
 import com.example.varta.Models.Users;
 import com.example.varta.R;
+import com.example.varta.cryptography.AESCryptoChat;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
@@ -25,6 +26,7 @@ import com.squareup.picasso.Picasso;
 import java.util.ArrayList;
 
 public class UsersAdapter extends RecyclerView.Adapter<UsersAdapter.ViewHolder>{
+    AESCryptoChat aes = new AESCryptoChat("lv39eptlvuhaqqsr");
     ArrayList<Users> list;
     Context context;
 
@@ -54,7 +56,11 @@ public class UsersAdapter extends RecyclerView.Adapter<UsersAdapter.ViewHolder>{
                             public void onDataChange(@NonNull DataSnapshot snapshot) {
                                 if (snapshot.hasChildren()){
                                     for(DataSnapshot snapshot1: snapshot.getChildren()){
-                                        holder.lastMessage.setText(snapshot1.child("message").getValue().toString());
+                                        try {
+                                            holder.lastMessage.setText(aes.decrypt(snapshot1.child("message").getValue().toString()));
+                                        } catch (Exception e) {
+                                            e.printStackTrace();
+                                        }
 
                                     }
                                 }

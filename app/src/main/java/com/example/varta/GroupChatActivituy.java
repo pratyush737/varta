@@ -11,6 +11,7 @@ import android.view.View;
 
 import com.example.varta.Adapters.ChatAdapter;
 import com.example.varta.Models.MessageModel;
+import com.example.varta.cryptography.AESCryptoChat;
 import com.example.varta.databinding.ActivityGroupChatActivituyBinding;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.auth.FirebaseAuth;
@@ -23,6 +24,7 @@ import java.util.ArrayList;
 import java.util.Date;
 
 public class GroupChatActivituy extends AppCompatActivity {
+    AESCryptoChat aes = new AESCryptoChat("lv39eptlvuhaqqsr");
     ActivityGroupChatActivituyBinding binding;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -80,7 +82,15 @@ public class GroupChatActivituy extends AppCompatActivity {
         @Override
         public void onClick(View view) {
             final String message=binding.etMessage.getText().toString();
-            final MessageModel model=new MessageModel(senderId,message);
+            String encryptedMessage = null;
+
+            try {
+                encryptedMessage = aes.encrypt(message);
+            } catch (Exception e) {
+//            Logger.getLogger(AESCrypt.class.getName()).log(Level.SEVERE, null, e);
+                e.printStackTrace();
+            }
+            final MessageModel model=new MessageModel(senderId,encryptedMessage);
             model.setTimestamp(new Date().getTime());
             binding.etMessage.setText("");
             databse.getReference().child("Group Chat")

@@ -1,18 +1,18 @@
 package com.example.varta;
 
+import android.content.Intent;
+import android.os.Bundle;
+import android.view.View;
+
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 
-import android.content.Intent;
-import android.os.Bundle;
-import android.os.Message;
-import android.view.View;
-
 import com.example.varta.Adapters.ChatAdapter;
+import com.example.varta.MainActivity;
 import com.example.varta.Models.MessageModel;
+import com.example.varta.cryptography.AESCryptoChat;
 import com.example.varta.databinding.ActivityChatDetailBinding;
-import com.example.varta.databinding.ActivitySigninBinding;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DataSnapshot;
@@ -25,7 +25,7 @@ import java.util.ArrayList;
 import java.util.Date;
 
 public class ChatDetailActivity extends AppCompatActivity {
-
+    AESCryptoChat aes = new AESCryptoChat("lv39eptlvuhaqqsr");
     ActivityChatDetailBinding binding;
     FirebaseDatabase database;
     FirebaseAuth auth;
@@ -33,70 +33,81 @@ public class ChatDetailActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        binding=ActivityChatDetailBinding.inflate(getLayoutInflater());
+        binding = ActivityChatDetailBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
 
         getSupportActionBar().hide();
         database=FirebaseDatabase.getInstance();
-        auth=FirebaseAuth.getInstance();
+        auth= FirebaseAuth.getInstance();
 
+        final String senderId = auth.getUid();
+        String receiveId = getIntent().getStringExtra("userId");
+        String userName = getIntent().getStringExtra("userName");
+        String profilePic = getIntent().getStringExtra("profilePic");
 
-
-        final String senderID= auth.getUid();
-        String recieveID=getIntent().getStringExtra("userId");
-        String userName=getIntent().getStringExtra("userName");
-        String ProfilePic=getIntent().getStringExtra("ProfilePic");
         binding.userName.setText(userName);
-        Picasso.get().load(ProfilePic).placeholder(R.drawable.avatar_user_svgrepo_com).into(binding.profileImage);
+        Picasso.get().load(profilePic).placeholder(R.drawable.avatar_user_svgrepo_com).into(binding.profileImage);
+
         binding.backArrow.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Intent intent=new Intent(ChatDetailActivity.this,MainActivity.class);
+                Intent intent = new Intent(ChatDetailActivity.this, MainActivity.class);
                 startActivity(intent);
-
             }
         });
 
-        final ArrayList<MessageModel> messageModels=new ArrayList<>();
-        final ChatAdapter chatAdapter=new ChatAdapter(messageModels,this,recieveID);
+        final ArrayList<MessageModel> messageModels = new ArrayList<>();
+
+        final ChatAdapter chatAdapter = new ChatAdapter(messageModels, this, receiveId  );
         binding.chatRecyclarView.setAdapter(chatAdapter);
 
-        LinearLayoutManager layoutManager=new LinearLayoutManager(this);
+        LinearLayoutManager layoutManager = new LinearLayoutManager(this);
         binding.chatRecyclarView.setLayoutManager(layoutManager);
-        final  String senderRoom=senderID+recieveID;
-        final String  receiverRoom=recieveID+recieveID;
+
+        final String senderRoom = senderId + receiveId;
+        final String receiverRoom = receiveId +senderId;
 
         database.getReference().child("chats")
-                        .child(senderRoom)
-                                .addValueEventListener(new ValueEventListener() {
-                                    @Override
-                                    public void onDataChange(@NonNull DataSnapshot snapshot) {
-                                        messageModels.clear();
-                                        for(DataSnapshot snapshot1: snapshot.getChildren())
-                                        {
-                                            MessageModel model=snapshot1.getValue(MessageModel.class);
-                                            model.setMessageId(snapshot1.getKey());
-                                            messageModels.add(model);
+                .child(senderRoom)
+                .addValueEventListener(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(@NonNull DataSnapshot snapshot) {
+                        messageModels.clear();
+                        for(DataSnapshot snapshot1: snapshot.getChildren()){
+                            MessageModel model = snapshot1.getValue(MessageModel.class);
+                            model.setMessageId((snapshot1).getKey());
 
-                                        }
-                                            chatAdapter.notifyDataSetChanged();
-                                    }
+                            messageModels.add(model);
+                        }
+                        chatAdapter.notifyDataSetChanged();
+                    }
 
-                                    @Override
-                                    public void onCancelled(@NonNull DatabaseError error) {
+                    @Override
+                    public void onCancelled(@NonNull DatabaseError error) {
 
-                                    }
-                                }); 
+                    }
+                });
+
+
 
         binding.send.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                String message=binding.etMessage.getText().toString();
-                final MessageModel model=new MessageModel(senderID,message);
+                String message = binding.etMessage.getText().toString();
+
+                String encryptedMessage = null;
+
+                try {
+                    encryptedMessage = aes.encrypt(message);
+                } catch (Exception e) {
+//            Logger.getLogger(AESCrypt.class.getName()).log(Level.SEVERE, null, e);
+                    e.printStackTrace();
+                }
+                final MessageModel model = new MessageModel(senderId, encryptedMessage);
                 model.setTimestamp(new Date().getTime());
                 binding.etMessage.setText("");
-                database.getReference().child("chats")
-                        .child(senderRoom)
+
+                database.getReference().child("chats").child(senderRoom)
                         .push()
                         .setValue(model).addOnSuccessListener(new OnSuccessListener<Void>() {
                             @Override
@@ -106,14 +117,13 @@ public class ChatDetailActivity extends AppCompatActivity {
                                         .push()
                                         .setValue(model).addOnSuccessListener(new OnSuccessListener<Void>() {
                                             @Override
-                                            public void onSuccess(Void aVoid     ) {
+                                            public void onSuccess(Void aVoid) {
+
 
                                             }
                                         });
-
                             }
                         });
-
 
             }
         });

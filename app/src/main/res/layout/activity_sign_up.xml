@@ -23,7 +23,7 @@
             android:id="@+id/backArrow"
             android:layout_width="100dp"
             android:layout_height="100dp"
-            app:srcCompat="@drawable/v" />
+            app:srcCompat="@drawable/v_icon" />
 
         <EditText
             android:id="@+id/etuserName"
@@ -80,6 +80,8 @@
             android:layout_marginTop="10dp"
             android:padding="15dp"
             android:text="Sign Up"
+            android:background="#AA075D"
+            android:textColor="@color/white"
             app:cornerRadius="4dp" />
 
         <LinearLayout

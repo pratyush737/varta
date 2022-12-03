@@ -13,6 +13,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.varta.Models.MessageModel;
 import com.example.varta.R;
+import com.example.varta.cryptography.AESCryptoChat;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.FirebaseDatabase;
 
@@ -20,6 +21,7 @@ import java.util.ArrayList;
 
 
 public class ChatAdapter extends RecyclerView.Adapter{
+    AESCryptoChat aes = new AESCryptoChat("lv39eptlvuhaqqsr");
     ArrayList<MessageModel> messageModels;
     Context context;
     String recId;
@@ -101,11 +103,19 @@ public class ChatAdapter extends RecyclerView.Adapter{
 
 
         if(holder.getClass()==SenderViewVolder.class){
-            ((SenderViewVolder)holder).senderMsg.setText(messageModel.getMessage());
+            try {
+                ((SenderViewVolder)holder).senderMsg.setText(aes.decrypt(messageModel.getMessage()));
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
 
         }
         else{
-            ((RecieverViewHolder)holder).receiverMsg.setText(messageModel.getMessage());
+            try {
+                ((RecieverViewHolder)holder).receiverMsg.setText(aes.decrypt(messageModel.getMessage()));
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
         }
 
 
