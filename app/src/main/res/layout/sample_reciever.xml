@@ -41,6 +41,7 @@
         android:layout_marginRight="4dp"
         android:layout_marginBottom="3dp"
         android:text="12:00 pm"
+        android:textColor="@color/black"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         android:textSize="10sp"
